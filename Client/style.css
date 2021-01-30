@@ -1,0 +1,41 @@
+body{
+    display:flex; 
+    flex-direction: row; 
+    justify-content: space-around;
+    align-items: center;
+}
+
+#googleMap{
+    width:70%;
+    height:700px; 
+    border: 1px solid gray;
+}
+
+#info{
+    width: 25%; 
+    height: 700px; 
+    border: 1px solid gray; 
+    margin-right: 30px; 
+    box-shadow: 15px 3px 15px 3px gray;
+}
+
+#formNhap{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    /* align-items: center; */
+
+}
+
+#info form input{
+    /* height: 50px;
+    width: 100px; */
+    width: 60%;
+    margin: 10px;
+}
+
+#info form div{
+    flex-direction: row;
+    justify-content: space-around;
+    margin: 10px;
+}

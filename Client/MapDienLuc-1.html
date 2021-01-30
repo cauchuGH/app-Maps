@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>điện lực đẹp trai</title>
+  <!-- <link rel="stylesheet" type="text/css" href="style.css"> -->
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <!-- <button value="tra cứu" style = "width: 50px; height: 20px"></button> -->
+  <style>
+    .googleMAP {
+      width: 70%;
+      height: 950px;
+      float: left;
+      border: 3px solid black;
+    }
+
+    .info {
+      width: 25%;
+      height: 1080px;
+      float: right;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="googleMap" class="googleMAP"></div>
+  <div id="info" class="info">
+    <form id='formNhap'>
+      <label for="ten_id">id:</label><br>
+      <input id='idThuyDien' placeholder="id " class="form-control" name='id'><br>
+      <label for="ten_id">Tên thủy điện:</label><br>
+      <input id='ten_id' placeholder="Tên thủy điện " class="form-control" name='ten'><br>
+      <label for="ten_id">Công xuất :</label><br>
+      <input id='congXuat_id' placeholder="Công xuất " class="form-control" name='congXuat' type="number" step=0.01><br>
+      <label for="ten_id">Sản lượng:</label><br>
+      <input id='sanLuong_id' placeholder="Sản lượng " class="form-control" name='sanLuong' type="number" step=0.01><br>
+      <label for="ten_id">Kinh độ:</label><br>
+      <input id='kinhDo_id' placeholder="Kinh độ " class="form-control" name='kinhDo' disabled><br>
+      <label for="ten_id">Vĩ độ:</label><br>
+      <input id='viDo_id' placeholder="Vĩ độ " class="form-control" name='viDo' disabled><br>
+      <label for="ten_id">Vị Trí hành chính:</label><br>
+      <input id='viTri_id' placeholder="Vị trí hành chính " class="form-control" name='viTri'><br>
+      <label for="ten_id">Tình trạng:</label><br>
+      <!-- <input id='tinhTrang_id' placeholder="Tình trạng " class="form-control"  name='tinhTrang'><br> -->
+      <select class="form-control" id="tinhTrang_id" name='tinhTrang'>
+        <option></option>
+        <option>Đang vận hành</option>
+        <option>Đang Bảo Trì</option>
+        <option>Không sử dụng</option>
+      </select>
+      <label for="ten_id">Quy mô:</label><br>
+      <!-- <input id='quyMo_id' placeholder="Quy mô " class="form-control" name='quyMo'><br> -->
+      <select class="form-control" id="quyMo_id" name='quyMo'>
+        <option></option>
+        <option>Lớn</option>
+        <option>Vừa</option>
+        <option>Nhỏ</option>
+      </select>
+      <label for="ten_id">Loại:</label><br>
+      <!-- <input id='loai_id' placeholder="Loại " class="form-control" name='loai'><br> -->
+      <select class="form-control" id="loai_id">
+        <option></option>
+        <option>Có hồ chứa</option>
+        <option>Không Có hồ chứa</option>
+      </select>
+      <label for="ten_id">Trên sông:</label><br>
+      <input id='song_id' placeholder="Trên sông " class="form-control" name='song'><br>
+      <label for="ten_id">Dung tích:</label><br>
+      <input id='dungTich_id' placeholder="Dung tích " class="form-control" name='dungTich' type="number"><br>
+      <label for="ten_id">Chủ đầu tư:</label><br>
+      <input id='chu_id' placeholder="Chủ đầu tư " class="form-control" name='chu'><br>
+      <div>
+        <button onclick="ThemThuyDien()" class="btn btn-success" type="button" >Thêm</button>
+        <button onclick="CapNhatThuyDien()" class="btn btn-info" type="button" >Cập Nhật</button>
+        <button onclick="XoaThuyDien()" class="btn btn-delete" type="button" >xóa</button>
+        <button type="reset" class="btn btn-warning">Reset</button>
+      </div>
+    </form>
+  </div>
+</body>
+<footer>
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="http://maps.googleapis.com/maps/api/js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+
+  <script>
+    var markers = new Array();
+    var inforWindows = new Array();
+
+    var add = false;
+    var update = false;
+    var deleted = false;
+
+    var curentWindow = 0;
+    var idThuyDien
+
+    function SetMakers(data, map) {
+      for (let i in data.data) {
+        // lay toa do tu data
+        const latLng = new google.maps.LatLng(data.data[i].kinh_do, data.data[i].vi_do);
+
+        // marker
+        markers[i] = new google.maps.Marker({
+          position: latLng,
+          //icon: 'favicon.ico',
+          map: map,
+          title: "Thủy điện " + data.data[i].ten_thuy_dien,
+        });
+
+        //content string 
+        const ten_thuy_dien = data.data[i].ten_thuy_dien;
+        const dung_tich = data.data[i].dung_tich;
+        const tinh_trang = data.data[i].tinh_trang;
+        const tren_song = data.data[i].tren_song;
+        const vi_tri_hanh_chinh = data.data[i].vi_tri_hanh_chinh
+        const contentString =
+          `<div >
+            <h2>Nhà máy thủy điện ${ten_thuy_dien}</h2>
+            <p>dung tich: ${dung_tich}</p>
+            <p>vị trí: ${tren_song}</p>
+            <p>tình trạng: ${tinh_trang}</p>
+            <p>Thuộc: ${vi_tri_hanh_chinh}</p>
+          </div>` ;
+
+        // infowindow
+        inforWindows[i] = new google.maps.InfoWindow({
+          content: contentString,
+        });
+
+        // tạo sk bấm vào 1 marker
+        markers[i].addListener("click", () => {
+
+          // đóng cửa sổ trước đó
+          inforWindows[curentWindow].close();
+
+          // mở cửa sổ tại maker
+          inforWindows[i].open(map, markers[i]);
+          curentWindow = i;
+
+          // xét đk thêm, sửa và xóa
+          add = false;
+          update = true;
+          deleted = true;
+
+          // truyền data lên form
+          document.getElementById("idThuyDien").value = data.data[i].id;
+          document.getElementById("ten_id").value = data.data[i].ten_thuy_dien;
+          document.getElementById("congXuat_id").value = data.data[i].cong_xuat;
+          document.getElementById("sanLuong_id").value = data.data[i].san_luong;
+          document.getElementById("kinhDo_id").value = data.data[i].kinh_do;
+          document.getElementById("viDo_id").value = data.data[i].vi_do;
+          document.getElementById("viTri_id").value = data.data[i].vi_tri_hanh_chinh;
+          document.getElementById("tinhTrang_id").value = data.data[i].tinh_trang;
+          document.getElementById("quyMo_id").value = data.data[i].quy_mo;
+          document.getElementById("loai_id").value = data.data[i].loai;
+          document.getElementById("song_id").value = data.data[i].tren_song;
+          document.getElementById("dungTich_id").value = data.data[i].dung_tich;
+          document.getElementById("chu_id").value = data.data[i].chu_dau_tu;
+        })
+      }
+    };
+
+    // tạo map 
+    var myCenter = new google.maps.LatLng(20.808208, 105.323278);
+
+    function initialize() {
+      var mapProp = {
+        center: myCenter,
+        zoom: 8,
+        //mapTypeId: google.maps.MapTypeId.ROADMAP
+      };
+
+      var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+
+      // truyền data vào map
+      FetchData(map);
+
+      // thêm sk khi bấm vào map thì truyền kd, vd lên ô thông tin
+      map.addListener("click", (mapsMouseEvent) => {
+        let toaDo = mapsMouseEvent.latLng.toJSON()
+
+        // xét đk thêm sửa xóa
+        add = true;
+        update = false;
+        deleted = false;
+
+        GetToaDo(toaDo)
+      });
+    }
+
+    google.maps.event.addDomListener(window, 'load', initialize);
+  </script>
+
+
+  <script>
+    // xet toa do khi bam vao
+    function GetToaDo(latLng) {
+      inforWindows[curentWindow].close();
+
+      document.getElementById("ten_id").value = '';
+      document.getElementById("congXuat_id").value = '';
+      document.getElementById("sanLuong_id").value = '';
+      document.getElementById("kinhDo_id").value = latLng.lat;
+      document.getElementById("viDo_id").value = latLng.lng;
+      document.getElementById("viTri_id").value = '';
+      document.getElementById("tinhTrang_id").value = '';
+      document.getElementById("quyMo_id").value = '';
+      document.getElementById("loai_id").value = '';
+      document.getElementById("song_id").value = '';
+      document.getElementById("dungTich_id").value = '';
+      document.getElementById("chu_id").value = '';
+    }
+  </script>
+
+  <script>
+    // lay data tu server
+    function FetchData(map) {
+      fetch('http://localhost:4000/map')
+        .then(response => response.json())
+        .then((data) => {
+          console.log(data);
+          SetMakers(data, map);
+        })
+    }
+
+    // post data them thuy dien
+
+    function ThemThuyDien() {
+      let ten_dt = document.getElementById("ten_id").value;
+      let congXuat_dt = document.getElementById("congXuat_id").value;
+      let sanLuong_dt = document.getElementById("sanLuong_id").value;
+      let kinhDo_dt = document.getElementById("kinhDo_id").value;
+      let viDo_dt = document.getElementById("viDo_id").value;
+      let viTri_dt = document.getElementById("viTri_id").value;
+      let tinhTrang_dt = document.getElementById("tinhTrang_id").value;
+      let quyMo_dt = document.getElementById("quyMo_id").value;
+      let loai_dt = document.getElementById("loai_id").value;
+      let song_dt = document.getElementById("song_id").value;
+      let dungTich_dt = document.getElementById("dungTich_id").value;
+      let chu_dt = document.getElementById("chu_id").value;
+
+      if (add === false) {
+        alert('thủy điện đã tồn tại, không thể thêm !!!')
+      }
+      else if (ten_dt === '' || kinhDo_dt === '' || viDo_dt === '') {
+        alert("không thể thiếu trường Tên thủy điện, Kinh độ, Vĩ độ !!!")
+      }
+      else {
+        let dataPost = {
+          chu_dau_tu: chu_dt,
+          cong_xuat: congXuat_dt,
+          dung_tich: dungTich_dt,
+          kinh_do: kinhDo_dt,
+          loai: loai_dt,
+          quy_mo: quyMo_dt,
+          san_luong: sanLuong_dt,
+          ten_thuy_dien: ten_dt,
+          tinh_trang: tinhTrang_dt,
+          tren_song: song_dt,
+          vi_do: viDo_dt,
+          vi_tri_hanh_chinh: viTri_dt,
+        }
+        alert(JSON.stringify(dataPost))
+        
+        fetch('http://localhost:4000/map', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataPost),
+        })
+          .then((response) => alert(JSON.stringify(response)))
+          .catch((error) => (
+            console.log('loi cmnr :v :', error)
+          ))
+      }
+
+    }
+
+    // sửa thông tin thủy điện
+    function CapNhatThuyDien() {
+      let ten_dt = document.getElementById("ten_id").value;
+      let congXuat_dt = document.getElementById("congXuat_id").value;
+      let sanLuong_dt = document.getElementById("sanLuong_id").value;
+      let kinhDo_dt = document.getElementById("kinhDo_id").value;
+      let viDo_dt = document.getElementById("viDo_id").value;
+      let viTri_dt = document.getElementById("viTri_id").value;
+      let tinhTrang_dt = document.getElementById("tinhTrang_id").value;
+      let quyMo_dt = document.getElementById("quyMo_id").value;
+      let loai_dt = document.getElementById("loai_id").value;
+      let song_dt = document.getElementById("song_id").value;
+      let dungTich_dt = document.getElementById("dungTich_id").value;
+      let chu_dt = document.getElementById("chu_id").value;
+      if (update === false) {
+        alert("vui lòng chọn đúng vị trí thủy điện !!!")
+      }
+      else {
+        let dataUpdate = {
+          chu_dau_tu: chu_dt,
+          cong_xuat: congXuat_dt,
+          dung_tich: dungTich_dt,
+          kinh_do: kinhDo_dt,
+          loai: loai_dt,
+          quy_mo: quyMo_dt,
+          san_luong: sanLuong_dt,
+          ten_thuy_dien: ten_dt,
+          tinh_trang: tinhTrang_dt,
+          tren_song: song_dt,
+          vi_do: viDo_dt,
+          vi_tri_hanh_chinh: viTri_dt,
+        }
+
+        fetch('http://localhost:4000/update_thuy_dien', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataUpdate),
+        })
+          .then((response) => alert(JSON.stringify(response)))
+          .catch((error) => (
+            console.log('loi cmnr :v :', error)
+          ))
+      }
+    }
+
+    // Xoa Thuy Dien 
+    function XoaThuyDien() {
+      if (deleted === false) {
+        alert("vui lòng chọn đúng vị trí thủy điện !!!")
+      }
+      else {
+        idThuyDien = document.getElementById("idThuyDien").value
+        // dataDelete = {
+        //   id: idThuyDien,
+        // }
+        fetch('http://localhost:4000/delete_thuy_dien', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({"id": idThuyDien}),
+        })
+      }
+    }
+
+
+  </script>
+  <!-- <script>
+    function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+      directionsService.route({    // hàm route của DirectionsService sẽ thực hiện tính toán với các tham số truyền vào
+        origin: document.getElementById('source').value,    // điểm xuất phát
+        destination: document.getElementById('destination').value,    // điểm đích
+        travelMode: document.getElementById('mode').value,     // phương tiện di chuyển
+      }, function (response, status) {    // response trả về bao gồm tất cả các thông tin về chỉ đường
+        if (status === google.maps.DirectionsStatus.OK) {
+          directionsDisplay.setDirections(response); // hiển thị chỉ đường trên bản đồ (nét màu đỏ từ A-B)
+          showSteps(response); // Hiển thị chi tiết các bước cần phải đi đến đích.
+        } else {
+          window.alert('Request for getting direction is failed due to ' + status);    // Hiển thị lỗi
+        }
+      });
+    }    
+  </script> -->
+</footer>
+
+</html>
